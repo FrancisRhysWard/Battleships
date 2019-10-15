@@ -41,19 +41,23 @@ class Ship(object):
         """
         :return: True if and only if the direction of the ship is vertical
         """
-        # TODO
+        return self.x_start == self.x_end  ## if the x coordinates do not change the ship is vertical
 
     def is_horizontal(self) -> bool:
         """
         :return: True if and only if the direction of the ship is horizontal
         """
-        # TODO
+        return self.y_start == self.y_end  ## similar to is_vertical
 
     def length(self) -> int:
         """"
         :return: The number of positions the ship takes on Board
         """
-        # TODO
+        if self.is_vertical():  ##  if the ship is vertical
+            return self.y_end - self.y_start + 1  ##  difference between changing y variable to get length
+        else:
+            return self.x_end - self.x_start + 1  ## similar to above
+
 
     def is_on_coordinate(self,
                          coord_x: int,
@@ -64,7 +68,7 @@ class Ship(object):
         :param coord_y: integer representing the projection of a coordinate on the y-axis
         :return: True if and only if the ship if (coord_x, coord_y) is one of the coordinates of the ship
         """
-        # TODO
+        return (coord_x, coord_y) in self.get_all_coordinates()  ##  bool if the coord to check is in the set of all coords
 
     def gets_damage_at(self,
                        coord_damage_x: int,
@@ -75,7 +79,10 @@ class Ship(object):
         :param coord_damage_x: integer representing the projection of a coordinate on the x-axis
         :param coord_damage_y: integer representing the projection of a coordinate on the y-axis
         """
-        # TODO
+        if self.is_on_coordinate(coord_damage_x, coord_damage_y):  ##  if the ship is on the attacked coords
+            self.set_coordinates_damages.add((coord_damage_x, coord_damage_y))
+            ##  add the coords to the set of damaged coords
+
 
     def is_damaged_at(self,
                       coord_x: int,
@@ -86,25 +93,31 @@ class Ship(object):
         :param coord_y: integer representing the projection of a coordinate on the y-axis
         :return True if and only if the ship is damaged at (coord_x, coord_y)
         """
-        # TODO
+        return (coord_x, coord_y) in self.set_coordinates_damages  ##  checks if coords in set of damaged coords
 
     def number_damages(self) -> int:
         """
         :return: The total number of coordinates at which the ship is damaged
         """
-        # TODO
+        return len(self.set_coordinates_damages)  ##  length of set
 
     def has_sunk(self) -> bool:
         """
         :return: True if and only if ship is damaged at all its positions
         """
-        # TODO
+        return self.number_damages() == self.length()
 
     def get_all_coordinates(self) -> set:
         """
         :return: A set containing only all the coordinates of the ship
         """
-        # TODO
+        all_coords = set()  ##  create an empty set of coords
+        if self.is_vertical():
+            [all_coords.add((self.x_start, self.y_start + i)) for i in range(self.length())]  ##  adds coords ship coords to the set changing y_coords
+        else:
+            [all_coords.add((self.x_start + j, self.y_start)) for j in range(self.length())]
+        return all_coords
+
 
     def is_near_coordinate(self, coord_x: int, coord_y: int) -> bool:
         """
@@ -139,17 +152,21 @@ class Ship(object):
         :param other_ship: other object of class Ship
         :return: False if and only if there is a coordinate of other_ship that is near this ship.
         """
-        # TODO
 
+        return any(self.is_near_coordinate(other_ship_coord[0], other_ship_coord[1]) for other_ship_coord in other_ship.get_all_coordinates())
+        ## checks if any coordinates of other_ship are near coordinates of ship
 
 if __name__ == '__main__':
     # SANDBOX for you to play and test your functions
 
     ship = Ship(coord_start=(3, 3), coord_end=(5, 3))
+    print(f"Ship length {ship.length()}")
+    print(f"The ship coordinates are {ship.get_all_coordinates()}")
     print(ship.is_vertical())
     print(ship.is_near_coordinate(5, 3))
     ship.gets_damage_at(4, 3)
     ship.gets_damage_at(10, 3)
+    print(f'The ship is damaged at {ship.set_coordinates_damages}')
     print(ship.is_damaged_at(4, 3), ship.is_damaged_at(5, 3), ship.is_damaged_at(10, 3))
 
     ship_2 = Ship(coord_start=(4, 1), coord_end=(4, 5))
