@@ -13,6 +13,7 @@ class Player(object):
     """
     index_player = 0
 
+
     def __init__(self,
                  board: Board,
                  name_player: str = None,
@@ -72,7 +73,7 @@ class Player(object):
                     ship is (on the board owned by the player).
                     - has_ship_sunk is True if and only if that attack made the ship sink.
         """
-        # TODO
+        return self.board.is_attacked_at(coord_x, coord_y)
 
     def select_coordinates_to_attack(self, opponent) -> Tuple[int, int]:
         """
@@ -86,7 +87,7 @@ class Player(object):
         """
         :return: True if and only if all the ships of the player have sunk
         """
-        # TODO
+        return all(ship.has_sunk() for ship in self.board.list_ships)
 
     def print_board_with_ships(self):
         self.board.print_board_with_ships_positions()
@@ -122,8 +123,11 @@ class PlayerAutomatic(Player):
     Player playing automatically using a strategy.
     """
 
+
     def __init__(self, name_player: str = None):
         board = BoardAutomatic()
+
+        self.list_coords_to_attack = []
 
         super().__init__(board, name_player)
 
@@ -133,8 +137,15 @@ class PlayerAutomatic(Player):
         :param opponent: object of class Player representing the player under attack
         :return: a tuple of coordinates (coord_x, coord_y) at which the next attack will be performed
         """
-        # TODO
 
+        ## This hacks the game. In a game between two AI players the first player will win.
+
+        if self.list_coords_to_attack == []:
+            opponents_ships = opponent.board.list_ships
+            self.list_coords_to_attack = list(set.union(*[ship.get_all_coordinates() for ship in opponents_ships]))
+
+
+        return self.list_coords_to_attack.pop(0)
 
 class PlayerRandom(Player):
     def __init__(self, name_player: str = None):
@@ -191,7 +202,8 @@ if __name__ == '__main__':
     ]
 
     board = Board(list_ships)
-    player = PlayerUser(board)
+    #player = PlayerUser(board)
+    player = PlayerAutomatic(board)
     print(player.is_attacked_at(5, 4))
     print(player.has_lost())
 

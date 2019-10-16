@@ -70,3 +70,4 @@ class Game(object):
             print(f"--- {self.player_2} WINS THE GAME ---")
         else:
             print(f"--- {self.player_1} WINS THE GAME ---")
+

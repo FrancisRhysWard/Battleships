@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from ship import Ship
+from battleship.ship import Ship
 
 from itertools import combinations, permutations
 

@@ -1,6 +1,6 @@
 from battleship.board import Board, BoardAutomatic
 from battleship.game import Game
-from battleship.player import PlayerUser, PlayerRandom
+from battleship.player import PlayerUser, PlayerRandom, PlayerAutomatic
 from battleship.ship import Ship
 
 
@@ -40,6 +40,8 @@ def example_two_players_users():
                 player_2=player_bob)
 
     game.play()
+
+    game._print_results()
 
 
 def example_user_manual_board_vs_full_automatic():
@@ -84,3 +86,43 @@ def example_user_automatic_board_vs_full_automatic():
                 player_2=player_bob)
 
     game.play()
+
+def example_Auto_vs_Random():
+     # Creating the Board Automatically for the User (Alice)
+     #board_player_alice = BoardAutomatic()
+
+     # Creating her player
+     player_auto = PlayerAutomatic(name_player='Al')
+
+     # Creating a Random Player Bob, its board is automatically created randomly
+     player_bob = PlayerRandom(name_player="Bob")
+
+     # Creating and launching the game
+     game = Game(player_1=player_auto,
+                 player_2=player_bob)
+
+     game.play()
+    # game._print_results()
+
+def example_Auto_vs_Auto():
+     # Creating the Board Automatically for the User (Alice)
+     #board_player_alice = BoardAutomatic()
+
+     # Creating her player
+     player_auto = PlayerAutomatic(name_player='Al')
+
+     # Creating a Random Player Bob, its board is automatically created randomly
+     player_bob = PlayerAutomatic(name_player="Bob")
+
+     # Creating and launching the game
+     game = Game(player_1=player_auto,
+                  player_2=player_bob)
+
+     game.play()
+     # game._print_results()
+
+if __name__ == '__main__':
+ # SANDBOX for you to play and test your functions
+     example_Auto_vs_Random()
+     example_Auto_vs_Auto()
+
