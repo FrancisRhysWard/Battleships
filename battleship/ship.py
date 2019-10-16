@@ -113,7 +113,7 @@ class Ship(object):
         """
         all_coords = set()  ##  create an empty set of coords
         if self.is_vertical():
-            [all_coords.add((self.x_start, self.y_start + i)) for i in range(self.length())]  ##  adds coords ship coords to the set changing y_coords
+            [all_coords.add((self.x_start, self.y_start + i)) for i in range(self.length())]  ##  adds ship coords to the set, changing y_coords
         else:
             [all_coords.add((self.x_start + j, self.y_start)) for j in range(self.length())]
         return all_coords
@@ -160,6 +160,7 @@ if __name__ == '__main__':
     # SANDBOX for you to play and test your functions
 
     ship = Ship(coord_start=(3, 3), coord_end=(5, 3))
+    print(f'has the ship sunk? {ship.has_sunk()}')
     print(f"Ship length {ship.length()}")
     print(f"The ship coordinates are {ship.get_all_coordinates()}")
     print(ship.is_vertical())

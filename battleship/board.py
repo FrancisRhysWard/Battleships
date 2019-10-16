@@ -1,6 +1,10 @@
 from typing import List, Tuple
 
-from battleship.ship import Ship
+from ship import Ship
+
+from itertools import combinations, permutations
+
+from random import randint, choice
 
 OFFSET_UPPER_CASE_CHAR_CONVERSION = 64
 
@@ -28,6 +32,7 @@ class Board(object):
 
         self.list_ships = list_ships
         self.set_coordinates_previous_shots = set()
+        self.ship_lengths = [ship.length() for ship in self.list_ships]
 
         if not self.lengths_of_ships_correct():
             total_number_of_ships = sum(self.DICT_NUMBER_SHIPS_PER_LENGTH.values())
@@ -46,7 +51,7 @@ class Board(object):
         """
         :return: True if and only if all the ships on the board have sunk.
         """
-        # TODO
+        return all(ship.has_sunk() for ship in self.list_ships)
 
     def is_attacked_at(self, coord_x: int, coord_y: int) -> Tuple[bool, bool]:
         """
@@ -62,7 +67,17 @@ class Board(object):
                     - has_ship_sunk is True if and only if that attack made the ship sink.
         """
 
-        # TODO
+        is_ship_hit = False
+        has_ship_sunk = False
+        for ship in self.list_ships:
+            if ship.is_on_coordinate(coord_x, coord_y):
+                ship.gets_damage_at(coord_x, coord_y)
+                is_ship_hit = True
+                has_ship_sunk = ship.has_sunk()
+                return (is_ship_hit, has_ship_sunk)
+
+        return(is_ship_hit, has_ship_sunk)
+
 
     def print_board_with_ships_positions(self) -> None:
         array_board = [[' ' for _ in range(self.SIZE_X)] for _ in range(self.SIZE_Y)]
@@ -127,14 +142,21 @@ class Board(object):
         :return: True if and only if there is the right number of ships of each length, according to
         Board.DICT_NUMBER_SHIPS_PER_LENGTH
         """
-        # TODO
+        keys = sorted(list(set(self.ship_lengths))) ## set removes duplicates
+
+        dict_number_ships_per_length = {key: self.ship_lengths.count(key) for key in keys}
+
+        return dict_number_ships_per_length == self.DICT_NUMBER_SHIPS_PER_LENGTH
+
+        ##  this method is robust to changes in the number of ships and new ship lengths
+
 
     def are_some_ships_too_close_from_each_other(self) -> bool:
         """
         :return: True if and only if there are at least 2 ships on the board that are near each other.
         """
-        # TODO
-
+        all_ship_combination_pairs = combinations(self.list_ships, 2)  ## returns a list of tuples of all ship pairs
+        return any(ship.is_near_ship(other_ship) for (ship, other_ship) in all_ship_combination_pairs)  ##  checks if any two ships are near eachother
 
 class BoardAutomatic(Board):
     def __init__(self):
@@ -144,24 +166,61 @@ class BoardAutomatic(Board):
         """
         :return: A list of automatically (randomly) generated ships for the board
         """
-        # TODO
+        free_coords = set(permutations(range(1,11), 2))  ## all the coords in a 10x10 board
+        list_ships = []
+        first_ship = True
+        for length in list(self.DICT_NUMBER_SHIPS_PER_LENGTH.keys())[::-1]:  ## reverse slice to create big ships first
+            for number_of_ships_of_length in range(self.DICT_NUMBER_SHIPS_PER_LENGTH[length]):
+                ship_created_successfully = False
+                while not ship_created_successfully:
+                    start_coord = choice(tuple(free_coords))  ## random start coord
+                    end_coord = choice([(start_coord[0] + (length - 1), start_coord[1]), (start_coord[0], start_coord[1] + (length - 1)), (start_coord[0] - (length - 1), start_coord[1]),  (start_coord[0], start_coord[1] - (length - 1))])  ## randomly chooses between vertical or horizontal via choice of end_coord
+                    new_ship = Ship(coord_start = start_coord, coord_end = end_coord)  ##  create the new ship
+                    if not new_ship.get_all_coordinates().issubset(free_coords): ## if any of the ship coords are not valid
+                        continue
+                    elif first_ship:
+                        list_ships.append(new_ship)
+                        first_ship = False
+                        free_coords.difference_update(new_ship.get_all_coordinates())  ##  remove all taken coords
+                        ship_created_successfully = True
+                    elif not any(new_ship.is_near_ship(other_ship) for other_ship in list_ships):
+                        list_ships.append(new_ship)
+                        free_coords.difference_update(new_ship.get_all_coordinates())
+                        ship_created_successfully = True
+        return list_ships
+
 
 
 if __name__ == '__main__':
     # SANDBOX for you to play and test your functions
-    list_ships = [
+    '''list_ships = [
         Ship(coord_start=(1, 1), coord_end=(1, 1)),
         Ship(coord_start=(3, 3), coord_end=(3, 4)),
         Ship(coord_start=(5, 3), coord_end=(5, 5)),
         Ship(coord_start=(7, 1), coord_end=(7, 4)),
         Ship(coord_start=(9, 3), coord_end=(9, 7)),
     ]
+'''
 
-    board = Board(list_ships)
+
+    ##board = Board(list_ships)
+
+    board = BoardAutomatic()
+    board.generate_ships_automatically()
+
+   # for ship in list_ships:
+    #    print(ship.get_all_coordinates())
+     #   print(ship.is_on_coordinate(1,1))
+
+
+    print(f' lengths of ships correct? {board.lengths_of_ships_correct()}')
+    print(f'are any ships too close?  {board.are_some_ships_too_close_from_each_other()}')
     board.print_board_with_ships_positions()
     board.print_board_without_ships_positions()
-    print(board.is_attacked_at(5, 4),
-          board.is_attacked_at(10, 9))
+
+    print(f'is attacked at (1, 1)?  {board.is_attacked_at(1, 1)}')
+    print(f'is attacked at (3, 3)?  {board.is_attacked_at(3, 3)}')
+    print(f'is attacked at (5, 4)?  {board.is_attacked_at(5, 4)}')
+    print(f'is attacked at (10, 9)?  {board.is_attacked_at(10, 9)}')
     print(board.set_coordinates_previous_shots)
     print(board.lengths_of_ships_correct())
-    print(board.are_some_ships_too_close_from_each_other())
