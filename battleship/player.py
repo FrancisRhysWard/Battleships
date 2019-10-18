@@ -126,14 +126,13 @@ class PlayerAutomatic(Player):
 
     def __init__(self, name_player: str = None):
         board = BoardAutomatic()
-        #self.set_positions_previously_attacked = set()
-        #self.last_attack_coord = None
-        #self.list_ships_opponent_previously_sunk = []
-
-        self.coord_to_attack = (1, 1)
-
 
         self.list_coords_to_attack = [(i, j) for i in range(1, board.SIZE_X + 1) for j in range(1, board.SIZE_Y + 1)]
+
+        self.first_go = True
+
+        self.coord_to_attack = random.choice(self.list_coords_to_attack)  ##  first shot random
+
 
         super().__init__(board, name_player)
 
@@ -163,6 +162,10 @@ class PlayerAutomatic(Player):
         :param opponent: object of class Player representing the player under attack
         :return: a tuple of coordinates (coord_x, coord_y) at which the next attack will be performed
         """
+
+        if self.first_go:
+            self.first_go = False
+            return self.coord_to_attack  ## if it's the first go return the random first coord
 
         opponents_ships = opponent.board.list_ships
 

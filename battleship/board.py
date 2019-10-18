@@ -183,7 +183,7 @@ class BoardAutomatic(Board):
                         first_ship = False
                         free_coords.difference_update(new_ship.get_all_coordinates())  ##  remove all taken coords
                         ship_created_successfully = True
-                    elif not any(new_ship.is_near_ship(other_ship) for other_ship in list_ships):
+                    elif not any(new_ship.is_near_ship(other_ship) for other_ship in list_ships):  ##  checks if new ship is near any other ships
                         list_ships.append(new_ship)
                         free_coords.difference_update(new_ship.get_all_coordinates())
                         ship_created_successfully = True
