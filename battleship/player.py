@@ -126,10 +126,36 @@ class PlayerAutomatic(Player):
 
     def __init__(self, name_player: str = None):
         board = BoardAutomatic()
+        #self.set_positions_previously_attacked = set()
+        #self.last_attack_coord = None
+        #self.list_ships_opponent_previously_sunk = []
 
-        self.list_coords_to_attack = []
+        self.coord_to_attack = (1, 1)
+
+
+        self.list_coords_to_attack = [(i, j) for i in range(1, board.SIZE_X + 1) for j in range(1, board.SIZE_Y + 1)]
 
         super().__init__(board, name_player)
+
+
+    def did_we_just_hit_a_ship(self, coord_x, coord_y, opponent):
+        '''
+        :param coord_x: integer representing the projection of a coordinate on the x-axis
+         :param coord_y: integer representing the projection of a coordinate on the y-axis
+         :return: True if and only if the (coord_x, coord_y) is one of the coordinates of any opponent ship
+        '''
+        opponents_ships = opponent.board.list_ships
+
+        return any(ship.is_on_coordinate(coord_x, coord_y) for ship in opponents_ships)
+
+    def did_we_just_sink_a_ship(self, coord_x, coord_y, opponent):
+
+        opponents_ships = opponent.board.list_ships
+
+        for ship in opponents_ships:
+            if ship.is_on_coordinate(coord_x, coord_y):
+                return ship.has_sunk()
+
 
     def select_coordinates_to_attack(self, opponent: Player) -> tuple:
         """
@@ -138,6 +164,28 @@ class PlayerAutomatic(Player):
         :return: a tuple of coordinates (coord_x, coord_y) at which the next attack will be performed
         """
 
+        opponents_ships = opponent.board.list_ships
+
+        self.list_coords_to_attack.remove(self.coord_to_attack)
+
+        x, y = self.coord_to_attack
+
+        if self.did_we_just_hit_a_ship(x, y, opponent):
+            diag_coords = [(x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1), (x - 1, y - 1)]
+            self.list_coords_to_attack = [coord for coord in self.list_coords_to_attack if coord not in diag_coords]  ## remove diag coords as no ship can be there
+            if self.did_we_just_sink_a_ship(x, y, opponent) == False:
+                while self.coord_to_attack not in self.list_coords_to_attack:
+                    self.coord_to_attack = random.choice([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), random.choice(self.list_coords_to_attack)])  ## if we just hit a ship but didn't sink it then try nearby coords that we have't tried, random chance to try a non-near coord in case we have tried all near coords
+            else:
+                self.coord_to_attack = random.choice(self.list_coords_to_attack)  ##  if we just sunk a ship then try a random non-tried coord
+        else:
+            self.coord_to_attack = random.choice(self.list_coords_to_attack)  ##  if we didn't just hit a ship then choose a random non-tried coord
+
+
+        return self.coord_to_attack
+
+
+'''
         ## This hacks the game. In a game between two AI players the first player will win.
 
         if self.list_coords_to_attack == []:
@@ -146,7 +194,7 @@ class PlayerAutomatic(Player):
 
 
         return self.list_coords_to_attack.pop(0)
-
+'''
 class PlayerRandom(Player):
     def __init__(self, name_player: str = None):
         board = BoardAutomatic()

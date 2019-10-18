@@ -124,5 +124,5 @@ def example_Auto_vs_Auto():
 if __name__ == '__main__':
  # SANDBOX for you to play and test your functions
      example_Auto_vs_Random()
-     example_Auto_vs_Auto()
+     #example_Auto_vs_Auto()
 
